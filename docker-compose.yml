@@ -1,0 +1,18 @@
+services:
+  worker:
+    image: 'contact-us-worker-rs:latest'
+    build:
+      context: .
+    restart: "no"
+    networks:
+      - default
+    ports:
+      - "8787:8787"
+    volumes:
+      - .:/app
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8787/api/v1/health-check/"]
+      interval: 15s
+      start_period: 10s
+      timeout: 5s
+      retries: 5

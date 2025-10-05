@@ -1,0 +1,8 @@
+target/
+.git/
+*.md
+Dockerfile
+.dockerignore
+.wrangler/
+node_modules/
+build/

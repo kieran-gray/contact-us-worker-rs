@@ -1,0 +1,23 @@
+{
+  "name": "contact-us-worker-rs",
+  "description": "Contact Us API for Cloudflare Workers.",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "author": {
+    "name": "Kieran Gray",
+    "email": "gray.kieran@protonmail.com",
+    "url": "https://github.com/kieran-gray"
+  },
+  "scripts": {
+    "test": "vitest",
+    "build": "wrangler build --env dev",
+    "build:dev": "cargo install -q worker-build && worker-build"
+  },
+  "devDependencies": {
+    "@cloudflare/vitest-pool-workers": "^0.9.10",
+    "@cloudflare/workers-types": "^4.20251004.0",
+    "vitest": "~3.2.0",
+    "wrangler": "^4.42.0"
+  }
+}
