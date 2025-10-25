@@ -48,7 +48,7 @@ describe("Contact Us Worker", () => {
 
   it("accepts valid POST request with all required fields", async () => {
     fetchMock
-      .get("https://test.quest-lock.com")
+      .get("https://test.com")
       .intercept({ method: "POST", path: "/turnstile/v0/siteverify" })
       .reply(200, JSON.stringify({ success: true }));
 
@@ -96,7 +96,7 @@ describe("Contact Us Worker", () => {
 
   it("rejects request when Turnstile validation fails", async () => {
     fetchMock
-      .get("https://test.quest-lock.com")
+      .get("https://test.com")
       .intercept({ method: "POST", path: "/turnstile/v0/siteverify" })
       .reply(200, JSON.stringify({
         success: false,
