@@ -17,7 +17,7 @@ use serde_json::json;
 
 use worker::*;
 
-use crate::setup::config::Config;
+use crate::setup::{app_state::AppState, config::Config};
 
 #[event(start)]
 fn start() {
@@ -46,14 +46,23 @@ async fn fetch(req: Request, env: Env, _ctx: Context) -> Result<Response> {
 
         let config = match Config::from_env(&env) {
             Ok(config) => config,
-            Err(e) => {
-                error!(error = ?e, "Failed to load config");
-                let json = json!({"message": "Failed to load config".to_string()});
+            Err(err) => {
+                error!(error = ?err, "Failed to create config");
+                let json = json!({"message": format!("Failed to create config: {err}")});
                 return Ok(Response::from_json(&json)?.with_status(500));
             }
         };
 
-        let router = api::router::create_router(config);
+        let app_state = match AppState::from_env(&env, config) {
+            Ok(app_state) => app_state,
+            Err(err) => {
+                error!(error = ?err, "Failed to create app state");
+                let json = json!({"message": format!("Failed to create app state: {err}")});
+                return Ok(Response::from_json(&json)?.with_status(500));
+            }
+        };
+
+        let router = api::router::create_router(app_state);
         let result = router.run(req, env).await;
 
         match &result {

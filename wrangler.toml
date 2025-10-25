@@ -13,6 +13,10 @@ binding = "DB"
 database_name = "contact-us-worker-rs"
 database_id = "YOUR-DB-ID"
 
+[[kv_namespaces]]
+binding = "AUTH_JWKS_CACHE"
+id = "YOUR-KV-ID"
+
 [vars]
 ENVIRONMENT = "production"
 TURNSTILE_SITEVERIFY_URL = "https://challenges.cloudflare.com/turnstile/v0/siteverify"
@@ -33,3 +37,7 @@ binding = "DB"
 database_name = "contact-us-worker-rs"
 database_id = "YOUR-DB-ID"
 preview_database_id = "YOUR-DB-ID"
+
+[[env.dev.kv_namespaces]]
+binding = "AUTH_JWKS_CACHE"
+id = "YOUR-KV-ID"

@@ -6,10 +6,10 @@ use crate::api::routes::{
 };
 use crate::api::utils::handlers::create_options_handler;
 use crate::api::utils::routes::{authenticated, public};
-use crate::setup::config::Config;
+use crate::setup::app_state::AppState;
 
-pub fn create_router(config: Config) -> Router<'static, Config> {
-    let router = Router::with_data(config);
+pub fn create_router(app_state: AppState) -> Router<'static, AppState> {
+    let router = Router::with_data(app_state);
     router
         .get_async("/api/v1/health-check/", health_check_handler)
         .post_async("/api/v1/contact-us/", |req, ctx| {

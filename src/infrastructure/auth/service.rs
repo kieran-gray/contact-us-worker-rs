@@ -37,10 +37,10 @@ pub struct AuthService<C: CacheTrait> {
 }
 
 impl<C: CacheTrait> AuthService<C> {
-    pub fn create(auth_issuer_url: String, auth_jwks_path: String, cache: C) -> Self {
+    pub fn create(auth_issuer_url: &str, auth_jwks_path: &str, cache: C) -> Self {
         Self {
-            auth_issuer_url,
-            auth_jwks_path,
+            auth_issuer_url: auth_issuer_url.to_string(),
+            auth_jwks_path: auth_jwks_path.to_string(),
             cache: Arc::new(cache),
         }
     }

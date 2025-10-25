@@ -23,12 +23,12 @@ pub struct CloudflareRequestValidationService {
 
 impl CloudflareRequestValidationService {
     pub fn create(
-        siteverify_url: String,
-        secret_key: String,
+        siteverify_url: &str,
+        secret_key: &str,
     ) -> Arc<dyn RequestValidationServiceTrait> {
         Arc::new(Self {
-            siteverify_url,
-            secret_key,
+            siteverify_url: siteverify_url.to_string(),
+            secret_key: secret_key.to_string(),
         })
     }
 }
