@@ -1,11 +1,12 @@
 use std::sync::Arc;
 
 use crate::application::{
-    exceptions::AppError, request_validation_service::RequestValidationServiceTrait,
+    exceptions::AppError, services::request_validation_service::RequestValidationServiceTrait,
 };
 use async_trait::async_trait;
 use serde::Deserialize;
-use worker::{Fetch, Headers, Method, Request, RequestInit, console_error, console_log};
+use tracing::{error, info};
+use worker::{Fetch, Headers, Method, Request, RequestInit};
 
 #[derive(Deserialize, Debug)]
 struct TurnstileResponse {
@@ -22,12 +23,12 @@ pub struct CloudflareRequestValidationService {
 
 impl CloudflareRequestValidationService {
     pub fn create(
-        siteverify_url: String,
-        secret_key: String,
+        siteverify_url: &str,
+        secret_key: &str,
     ) -> Arc<dyn RequestValidationServiceTrait> {
         Arc::new(Self {
-            siteverify_url,
-            secret_key,
+            siteverify_url: siteverify_url.to_string(),
+            secret_key: secret_key.to_string(),
         })
     }
 }
@@ -40,7 +41,8 @@ impl RequestValidationServiceTrait for CloudflareRequestValidationService {
             "response": token,
             "remoteip": ip,
         });
-        let body_string = serde_json::to_string(&body).map_err(|_| AppError::InternalError)?;
+        let body_string =
+            serde_json::to_string(&body).map_err(|err| AppError::InternalError(err.to_string()))?;
 
         let mut init = RequestInit::new();
         init.with_method(Method::Post);
@@ -49,44 +51,46 @@ impl RequestValidationServiceTrait for CloudflareRequestValidationService {
         let headers = Headers::new();
         headers
             .set("Content-Type", "application/json")
-            .map_err(|_| AppError::InternalError)?;
+            .map_err(|err| AppError::InternalError(err.to_string()))?;
         init.with_headers(headers);
 
         let request = Request::new_with_init(&self.siteverify_url, &init)
-            .map_err(|_| AppError::InternalError)?;
+            .map_err(|err| AppError::InternalError(err.to_string()))?;
 
         let mut response = Fetch::Request(request).send().await.map_err(|e| {
-            console_error!("Cloudflare request failed: {:?}", e);
-            AppError::InternalError
+            error!("Cloudflare request failed: {:?}", e);
+            AppError::InternalError(e.to_string())
         })?;
 
         let turnstile_response: TurnstileResponse = response.json().await.map_err(|e| {
-            console_error!("Failed to parse Turnstile response: {:?}", e);
-            AppError::InternalError
+            error!("Failed to parse Turnstile response: {:?}", e);
+            AppError::InternalError(e.to_string())
         })?;
 
-        console_log!("Turnstile response: {:?}", turnstile_response);
+        info!("Turnstile response: {:?}", turnstile_response);
 
         if turnstile_response.success {
             Ok(())
         } else {
             if let Some(error_codes) = &turnstile_response.error_codes {
-                console_log!("Turnstile validation failed with errors: {:?}", error_codes);
+                info!("Turnstile validation failed with errors: {:?}", error_codes);
 
                 for error_code in error_codes {
                     match error_code.as_str() {
                         "invalid-input-secret" => {
-                            console_error!("Invalid secret key configured");
-                            return Err(AppError::InternalError);
+                            error!("Invalid secret key configured");
+                            return Err(AppError::InternalError(
+                                "Invalid secret key configured".into(),
+                            ));
                         }
                         "invalid-input-response" => {
-                            console_log!("Invalid or expired token");
+                            info!("Invalid or expired token");
                         }
                         "timeout-or-duplicate" => {
-                            console_log!("Token timeout or duplicate submission");
+                            info!("Token timeout or duplicate submission");
                         }
                         _ => {
-                            console_log!("Unknown error code: {}", error_code);
+                            info!("Unknown error code: {}", error_code);
                         }
                     }
                 }

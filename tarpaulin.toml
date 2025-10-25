@@ -1,3 +1,0 @@
-[test_config]
-exclude-files = ["src/lib.rs"]
-out = ["Html"]

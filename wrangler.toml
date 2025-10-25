@@ -1,6 +1,6 @@
 name = "contact-us-worker-rs"
 main = "build/worker/shim.mjs"
-compatibility_date = "2025-10-04"
+compatibility_date = "2025-10-01"
 
 [build]
 command = "cargo install -q worker-build && worker-build --release"
@@ -13,19 +13,31 @@ binding = "DB"
 database_name = "contact-us-worker-rs"
 database_id = "YOUR-DB-ID"
 
+[[kv_namespaces]]
+binding = "AUTH_JWKS_CACHE"
+id = "YOUR-KV-ID"
+
 [vars]
 ENVIRONMENT = "production"
 TURNSTILE_SITEVERIFY_URL = "https://challenges.cloudflare.com/turnstile/v0/siteverify"
 ALLOWED_ORIGINS = ""
+AUTH_ISSUER_URL="https://YOUR_ORG.auth0.com/"
+AUTH_JWKS_PATH=".well-known/jwks.json"
 
 [env.dev]
 [env.dev.vars]
 ENVIRONMENT = "dev"
 TURNSTILE_SITEVERIFY_URL = "https://challenges.cloudflare.com/turnstile/v0/siteverify"
 ALLOWED_ORIGINS = "http://localhost:5173"
+AUTH_ISSUER_URL="https://YOUR_ORG.auth0.com/"
+AUTH_JWKS_PATH=".well-known/jwks.json"
 
 [[env.dev.d1_databases]]
 binding = "DB"
 database_name = "contact-us-worker-rs"
 database_id = "YOUR-DB-ID"
 preview_database_id = "YOUR-DB-ID"
+
+[[env.dev.kv_namespaces]]
+binding = "AUTH_JWKS_CACHE"
+id = "YOUR-KV-ID"

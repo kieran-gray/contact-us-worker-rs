@@ -8,4 +8,5 @@ use async_trait::async_trait;
 /// Provides methods for saving, retrieving, updating, and deleting Contact Messages in the database.
 pub trait ContactMessageRepository: Send + Sync {
     async fn save(&self, contact: &ContactMessage) -> Result<bool, RepositoryError>;
+    async fn get(&self) -> Result<Vec<ContactMessage>, RepositoryError>;
 }
