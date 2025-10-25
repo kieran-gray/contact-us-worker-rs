@@ -3,7 +3,7 @@ pub enum AppError {
     DatabaseError(String),
     NotFound(String),
     Unauthorised(String),
-    InternalError,
+    InternalError(String),
     ValidationError(String),
 }
 
@@ -13,7 +13,7 @@ impl std::fmt::Display for AppError {
             AppError::DatabaseError(msg) => write!(f, "Database error: {msg}"),
             AppError::NotFound(msg) => write!(f, "Not found: {msg}"),
             AppError::Unauthorised(msg) => write!(f, "Unauthorised: {msg}"),
-            AppError::InternalError => write!(f, "Internal server error"),
+            AppError::InternalError(msg) => write!(f, "Internal server error: {msg}"),
             AppError::ValidationError(msg) => write!(f, "Validation error: {msg}"),
         }
     }

@@ -1,42 +1,24 @@
-use serde::{Deserialize, Serialize};
-use worker::Response;
+use crate::application::exceptions::AppError;
+use serde_json::json;
 
-#[derive(Serialize, Deserialize, Debug)]
-pub struct ApiResponse<T>
-where
-    T: Serialize,
-{
-    pub status: u16,
-    pub message: String,
-    pub data: Option<T>,
-}
+const HTTP_STATUS_BAD_REQUEST: u16 = 400;
+const HTTP_STATUS_UNAUTHORISED: u16 = 401;
+const HTTP_STATUS_NOT_FOUND: u16 = 404;
+const HTTP_STATUS_INTERNAL_ERROR: u16 = 500;
 
-impl<T> ApiResponse<T>
-where
-    T: Serialize,
-{
-    pub fn success(data: T) -> Self {
-        Self {
-            status: 200,
-            message: "success".to_string(),
-            data: Some(data),
-        }
-    }
+impl From<AppError> for worker::Response {
+    fn from(error: AppError) -> Self {
+        let (status, message) = match &error {
+            AppError::DatabaseError(_) => (HTTP_STATUS_INTERNAL_ERROR, "Internal server error"),
+            AppError::NotFound(msg) => (HTTP_STATUS_NOT_FOUND, msg.as_str()),
+            AppError::Unauthorised(msg) => (HTTP_STATUS_UNAUTHORISED, msg.as_str()),
+            AppError::InternalError(_) => (HTTP_STATUS_INTERNAL_ERROR, "Internal server error"),
+            AppError::ValidationError(msg) => (HTTP_STATUS_BAD_REQUEST, msg.as_str()),
+        };
 
-    pub fn failure(status: u16, message: impl Into<String>) -> Self {
-        Self {
-            status,
-            message: message.into(),
-            data: None,
-        }
-    }
-
-    pub fn to_response(self) -> worker::Result<Response> {
-        let status = self.status;
-        let mut response = Response::from_json(&self)?;
-        response
-            .headers_mut()
-            .set("Content-Type", "application/json")?;
-        Ok(response.with_status(status))
+        let body = json!({ "message": message });
+        worker::Response::from_json(&body)
+            .unwrap()
+            .with_status(status)
     }
 }

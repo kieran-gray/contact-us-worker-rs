@@ -29,8 +29,8 @@ describe("Contact Us Worker", () => {
 
     expect(response.status).toBe(200);
     expect(response.headers.get("Access-Control-Allow-Origin")).toBe("http://localhost:5173");
-    expect(response.headers.get("Access-Control-Allow-Methods")).toBe("POST, OPTIONS");
-    expect(response.headers.get("Access-Control-Allow-Headers")).toBe("Content-Type");
+    expect(response.headers.get("Access-Control-Allow-Methods")).toBe("GET, POST, OPTIONS");
+    expect(response.headers.get("Access-Control-Allow-Headers")).toBe("Content-Type, Authorization");
   });
 
   it("rejects POST request without required fields", async () => {
@@ -48,7 +48,7 @@ describe("Contact Us Worker", () => {
 
   it("accepts valid POST request with all required fields", async () => {
     fetchMock
-      .get("https://test.com")
+      .get("https://test.quest-lock.com")
       .intercept({ method: "POST", path: "/turnstile/v0/siteverify" })
       .reply(200, JSON.stringify({ success: true }));
 
@@ -71,7 +71,7 @@ describe("Contact Us Worker", () => {
     console.log("Response status:", response.status);
     console.log("Response data:", data);
     expect(response.status).toBe(200);
-    expect(data).toHaveProperty("message");
+    expect(data).toBe(true);
   });
 
   it("blocks requests from disallowed origins", async () => {
@@ -96,7 +96,7 @@ describe("Contact Us Worker", () => {
 
   it("rejects request when Turnstile validation fails", async () => {
     fetchMock
-      .get("https://test.com")
+      .get("https://test.quest-lock.com")
       .intercept({ method: "POST", path: "/turnstile/v0/siteverify" })
       .reply(200, JSON.stringify({
         success: false,

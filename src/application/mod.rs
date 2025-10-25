@@ -1,3 +1,3 @@
-pub mod contact_message_service;
+pub mod dtos;
 pub mod exceptions;
-pub mod request_validation_service;
+pub mod services;

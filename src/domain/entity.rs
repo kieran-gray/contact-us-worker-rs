@@ -10,7 +10,7 @@ use super::enums::ContactMessageCategory;
 
 #[derive(Debug, Deserialize, Serialize, Clone)]
 pub struct ContactMessage {
-    pub id: String,
+    pub id: Uuid,
     pub category: ContactMessageCategory,
     pub email: String,
     pub name: String,
@@ -32,7 +32,7 @@ impl ContactMessage {
         Self::validate_data(&data)?;
 
         Ok(Self {
-            id: Uuid::now_v7().into(),
+            id: Uuid::now_v7(),
             category,
             email,
             name,
